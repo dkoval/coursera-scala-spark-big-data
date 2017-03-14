@@ -62,8 +62,8 @@ object WikipediaRanking {
    *   several seconds.
    */
   def rankLangsUsingIndex(index: RDD[(String, Iterable[WikipediaArticle])]): List[(String, Int)] = {
-    index.map(p => (p._1, p._2.size))
-      .sortBy(p => p._2, ascending = false)
+    index.mapValues(_.size)
+      .sortBy(_._2, ascending = false)
       .collect()
       .toList
   }
@@ -78,7 +78,7 @@ object WikipediaRanking {
   def rankLangsReduceByKey(langs: List[String], rdd: RDD[WikipediaArticle]): List[(String, Int)] = {
     rdd.flatMap(article => langs.collect { case lang if isLangMentionedInArticle(lang, article) => (lang, 1) })
       .reduceByKey(_ + _)
-      .sortBy(p => p._2, ascending = false)
+      .sortBy(_._2, ascending = false)
       .collect()
       .toList
   }
